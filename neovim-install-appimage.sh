@@ -4,9 +4,10 @@
 TARGETDIR=${1:-/opt/nvim}
 DOWNLOADDIR="$HOME/Downloads"
 
-SCRIPTPATH="$(readlink -f "$0")"
+SCRIPTPATH="$(readlink -f "${BASH_SOURCE[0]}")"
 URL="https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage"
 APPIMAGE="nvim-linux-x86_64.appimage"
+
 
 # Check if we can save to the download directory.
 if [[ ! -d "$DOWNLOADDIR" ]] || [[ ! -w "$DOWNLOADDIR" ]]; then
@@ -14,12 +15,13 @@ if [[ ! -d "$DOWNLOADDIR" ]] || [[ ! -w "$DOWNLOADDIR" ]]; then
 	DOWNLOADDIR="$HOME/Downloads";
 fi
 
+
 # DOWNLOAD the package.
-curl --output-dir "$DOWNLOADDIR" -LO "$URL" 
+curl --proto '=https' --output-dir "$DOWNLOADDIR" -sSfLO "$URL" 
 APPPATH="$DOWNLOADDIR/$APPIMAGE"
 
 if [[ ! -f "$APPPATH" ]]; then
-	echo "ERROR: didn't download to $APPPATH?"
+	echo "ERROR: didn't download to $APPPATH. Check the APPIMAGE=$APPIMAGE and URL=$URL"
 	exit
 fi
 
@@ -37,13 +39,17 @@ fi
 
 if [[ ! -w "$PARENTDIR" ]]; then
 	sudo mv "$APPPATH" "$TARGETDIR/"
-	sudo ln -s "$TARGETDIR/$APPIMAGE" "$TARGETDIR/nvim"
-	sudo cp "$SCRIPTPATH" "$TARGETDIR/"
+	sudo ln -s -f "$TARGETDIR/$APPIMAGE" "$TARGETDIR/nvim"
+	if [[ "x$SCRIPTPATH" != "x" ]]; then
+		sudo cp "$SCRIPTPATH" "$TARGETDIR/"
+	fi
 	sudo chown -R root:root "$TARGETDIR"
 else
 	mv "$APPPATH" "$TARGETDIR/"
-	ln -s "$TARGETDIR/$APPIMAGE" "$TARGETDIR/nvim"
-	cp "$SCRIPTPATH" "$TARGETDIR/"
+	ln -s -f "$TARGETDIR/$APPIMAGE" "$TARGETDIR/nvim"
+	if [[ "x$SCRIPTPATH" != "x" ]]; then
+		cp "$SCRIPTPATH" "$TARGETDIR/"
+	fi
 fi
 
 
