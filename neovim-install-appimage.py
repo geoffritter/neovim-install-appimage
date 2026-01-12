@@ -123,7 +123,7 @@ def install(*,path=None, symlink=None):
             if not target_path.exists():
                 target_path.mkdir()
             move("{str(download_path)}", app_image_path)
-            chown(app_image_path, user='root', group='root')
+            chown(app_image_path, uid=0, gid=0)
             chmod(app_image_path, 0o755)
             if "{str(symlink)}" != None:
                 if symlink_path.is_symlink():
